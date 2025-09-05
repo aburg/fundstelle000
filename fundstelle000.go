@@ -51,6 +51,7 @@ func main() {
 		if !info.IsDir() {
 
 			if pattern1.MatchString(info.Name()) {
+				fmt.Print(filepath.Dir(path) + "/")
 				red("%s", info.Name())
 				fmt.Print(" -> ")
 				new := pattern1.ReplaceAllString(info.Name(), "${1}00$2")
@@ -61,6 +62,7 @@ func main() {
 			}
 
 			if pattern2.MatchString(info.Name()) {
+				fmt.Print(filepath.Dir(path) + "/")
 				red("%s", info.Name())
 				fmt.Print(" -> ")
 				new := pattern2.ReplaceAllString(info.Name(), "${1}0$2")
