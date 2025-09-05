@@ -21,3 +21,8 @@ fundstelle000
 # this will actually make it happen
 fundstelle000 -w
 ```
+
+## What?
+
+This will search for files with two uppercase alphas followed by one or two
+digits and pad them with zeroes until there are three digits.
