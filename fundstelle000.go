@@ -3,13 +3,32 @@ package main
 import (
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"regexp"
 
 	"github.com/fatih/color"
 )
 
+func rename(path string, newName string) {
+	err := os.Rename(path, filepath.Join(filepath.Dir(path), newName))
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
+	doTheWork := false
+
+	if len(os.Args) > 1 {
+		if arg := os.Args[1]; arg == "doTheWork" {
+			doTheWork = true
+		} else {
+			fmt.Printf("unknown argument: %s (either give NO args or give 'doTheWork' as first and only arg)\n", arg)
+			os.Exit(1)
+		}
+	}
+
 	green := color.New(color.FgGreen).PrintfFunc()
 	red := color.New(color.FgRed).PrintfFunc()
 	yellow := color.New(color.FgYellow).PrintfFunc()
@@ -29,21 +48,29 @@ func main() {
 			return filepath.SkipDir
 		}
 
-		if pattern1.MatchString(info.Name()) {
-			red("%s", info.Name())
-			fmt.Print(" -> ")
-			new := pattern1.ReplaceAllString(info.Name(), "${1}00$2")
-			green("%s\n", new)
+		if !info.IsDir() {
+
+			if pattern1.MatchString(info.Name()) {
+				red("%s", info.Name())
+				fmt.Print(" -> ")
+				new := pattern1.ReplaceAllString(info.Name(), "${1}00$2")
+				green("%s\n", new)
+				if doTheWork {
+					rename(path, new)
+				}
+			}
+
+			if pattern2.MatchString(info.Name()) {
+				red("%s", info.Name())
+				fmt.Print(" -> ")
+				new := pattern2.ReplaceAllString(info.Name(), "${1}0$2")
+				green("%s\n", new)
+				if doTheWork {
+					rename(path, new)
+				}
+			}
 		}
 
-		if pattern2.MatchString(info.Name()) {
-			red("%s", info.Name())
-			fmt.Print(" -> ")
-			new := pattern2.ReplaceAllString(info.Name(), "${1}0$2")
-			green("%s\n", new)
-		}
-
-		// fmt.Printf("visited file or dir: %q\n", path)
 		return nil
 	})
 	if err != nil {
