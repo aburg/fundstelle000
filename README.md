@@ -1,0 +1,3 @@
+# Fundstelle000
+
+A tool for my dad. I might learn some golang here...
