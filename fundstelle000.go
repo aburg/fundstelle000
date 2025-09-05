@@ -14,7 +14,10 @@ func main() {
 	red := color.New(color.FgRed).PrintfFunc()
 	yellow := color.New(color.FgYellow).PrintfFunc()
 
-	pattern := regexp.MustCompile(`\b([A-Z]{1,3})(\d{1,2})\b`)
+	// one digit -> three digits
+	pattern1 := regexp.MustCompile(`\b([A-Z]{1,3})(\d{1})\b`)
+	// two digits -> three digits
+	pattern2 := regexp.MustCompile(`\b([A-Z]{1,3})(\d{2})\b`)
 
 	err := filepath.Walk(".", func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -26,10 +29,18 @@ func main() {
 			return filepath.SkipDir
 		}
 
-		if pattern.MatchString(info.Name()) {
+		if pattern1.MatchString(info.Name()) {
 			red("%s", info.Name())
 			fmt.Print(" -> ")
-			green("%s\n", info.Name())
+			new := pattern1.ReplaceAllString(info.Name(), "${1}00$2")
+			green("%s\n", new)
+		}
+
+		if pattern2.MatchString(info.Name()) {
+			red("%s", info.Name())
+			fmt.Print(" -> ")
+			new := pattern2.ReplaceAllString(info.Name(), "${1}0$2")
+			green("%s\n", new)
 		}
 
 		// fmt.Printf("visited file or dir: %q\n", path)
