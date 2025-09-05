@@ -9,3 +9,15 @@ I might learn some golang here...
 ```[bash]
 go install -ldflags="-s -w"
 ```
+
+## Usage
+
+```[bash]
+cd myStuff
+
+# this will list what would happen
+fundstelle000
+
+# this will actually make it happen
+fundstelle000 -w
+```

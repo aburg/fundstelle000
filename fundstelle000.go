@@ -21,10 +21,10 @@ func main() {
 	doTheWork := false
 
 	if len(os.Args) > 1 {
-		if arg := os.Args[1]; arg == "doTheWork" {
+		if arg := os.Args[1]; arg == "-w" {
 			doTheWork = true
 		} else {
-			fmt.Printf("unknown argument: %s (either give NO args or give 'doTheWork' as first and only arg)\n", arg)
+			fmt.Printf("unknown argument: %s (either give NO args or give '-w' as first and only arg)\n", arg)
 			os.Exit(1)
 		}
 	}
