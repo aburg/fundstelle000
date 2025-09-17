@@ -26,3 +26,13 @@ fundstelle000 -w
 
 This will search for files with two uppercase alphas followed by one or two
 digits and pad them with zeroes until there are three digits.
+
+## Features
+
+### Exclude stuff by prefix
+
+files with "gps" or "track" as prefix will get skipped
+
+### Prevent multimatching
+
+Only the first occurence of a fundstelle-like thing will get replaced.
