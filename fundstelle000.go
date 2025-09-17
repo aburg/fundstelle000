@@ -6,9 +6,15 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/fatih/color"
 )
+
+type MatchPattern struct {
+	Nullen int
+	Regexp *regexp.Regexp
+}
 
 func rename(path string, newName string) {
 	err := os.Rename(path, filepath.Join(filepath.Dir(path), newName))
@@ -29,14 +35,14 @@ func main() {
 		}
 	}
 
+	matchPatterns := []MatchPattern{
+		{2, regexp.MustCompile(`\b([A-Z]{1,3})(\d{1})\b`)},
+		{1, regexp.MustCompile(`\b([A-Z]{1,3})(\d{2})\b`)},
+	}
+
 	green := color.New(color.FgGreen).PrintfFunc()
 	red := color.New(color.FgRed).PrintfFunc()
 	yellow := color.New(color.FgYellow).PrintfFunc()
-
-	// one digit -> three digits
-	pattern1 := regexp.MustCompile(`\b([A-Z]{1,3})(\d{1})\b`)
-	// two digits -> three digits
-	pattern2 := regexp.MustCompile(`\b([A-Z]{1,3})(\d{2})\b`)
 
 	skipPatterns := []*regexp.Regexp{
 		regexp.MustCompile("^gps"),
@@ -56,36 +62,25 @@ func main() {
 		if !info.IsDir() {
 
 			for _, skipPattern := range skipPatterns {
-				if skipPattern.MatchString(info.Name()) {
+				if skipPattern.MatchString(strings.ToLower(info.Name())) {
 					yellow("skipping: %s\n", info.Name())
 					return nil
 				}
 			}
 
-			if pattern1.MatchString(info.Name()) {
-				fmt.Print(filepath.Dir(path) + "/")
-				red("%s", info.Name())
-				fmt.Print(" -> ")
-				new := pattern1.ReplaceAllString(info.Name(), "${1}00$2")
-				green("%s\n", new)
-				if doTheWork {
-					rename(path, new)
+			for _, matchPattern := range matchPatterns {
+				if loc := matchPattern.Regexp.FindStringIndex(info.Name()); loc != nil {
+					fmt.Print(filepath.Dir(path) + "/")
+					red("%s", info.Name())
+					fmt.Print(" -> ")
+					firstMatch := info.Name()[loc[0]:loc[1]]
+					new := info.Name()[:loc[0]] + matchPattern.Regexp.ReplaceAllString(firstMatch, "${1}"+strings.Repeat("0", matchPattern.Nullen)+"${2}") + info.Name()[loc[1]:]
+					green("%s\n", new)
+					if doTheWork {
+						rename(path, new)
+					}
+					return nil
 				}
-				// make sure only one replacement happens
-				return nil
-			}
-
-			if pattern2.MatchString(info.Name()) {
-				fmt.Print(filepath.Dir(path) + "/")
-				red("%s", info.Name())
-				fmt.Print(" -> ")
-				new := pattern2.ReplaceAllString(info.Name(), "${1}0$2")
-				green("%s\n", new)
-				if doTheWork {
-					rename(path, new)
-				}
-				// make sure only one replacement happens
-				return nil
 			}
 		}
 
