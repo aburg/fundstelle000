@@ -38,6 +38,11 @@ func main() {
 	// two digits -> three digits
 	pattern2 := regexp.MustCompile(`\b([A-Z]{1,3})(\d{2})\b`)
 
+	skipPatterns := []*regexp.Regexp{
+		regexp.MustCompile("^gps"),
+		regexp.MustCompile("^track"),
+	}
+
 	err := filepath.Walk(".", func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
@@ -50,6 +55,13 @@ func main() {
 
 		if !info.IsDir() {
 
+			for _, skipPattern := range skipPatterns {
+				if skipPattern.MatchString(info.Name()) {
+					yellow("skipping: %s\n", info.Name())
+					return nil
+				}
+			}
+
 			if pattern1.MatchString(info.Name()) {
 				fmt.Print(filepath.Dir(path) + "/")
 				red("%s", info.Name())
@@ -59,6 +71,8 @@ func main() {
 				if doTheWork {
 					rename(path, new)
 				}
+				// make sure only one replacement happens
+				return nil
 			}
 
 			if pattern2.MatchString(info.Name()) {
@@ -70,6 +84,8 @@ func main() {
 				if doTheWork {
 					rename(path, new)
 				}
+				// make sure only one replacement happens
+				return nil
 			}
 		}
 
